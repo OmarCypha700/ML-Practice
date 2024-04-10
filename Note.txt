@@ -1,0 +1,6 @@
+For linear regression
+- Document code and procedure
+clean data
+- fix missing values
+- Spliting dataset into train, test, and validation dataset
+- OneHotEncode categorical variables with low cardinality (having few unique values)
