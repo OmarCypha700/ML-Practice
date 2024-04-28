@@ -1,32 +1,26 @@
 
 import pickle
+from flask import Flask, request, jsonify
 ## Load the model
-print('loading the model...')
 input_file = 'model_C=1.0.bin'
 with open(input_file, 'rb') as f_in:
     dv,model = pickle.load(f_in)
 
-customer = {'gender': 'male',
- 'seniorcitizen': 0,
- 'partner': 'yes',
- 'dependents': 'yes',
- 'phoneservice': 'yes',
- 'multiplelines': 'no',
- 'internetservice': 'dsl',
- 'onlinesecurity': 'yes',
- 'onlinebackup': 'no',
- 'deviceprotection': 'no',
- 'techsupport': 'no',
- 'streamingtv': 'no',
- 'streamingmovies': 'no',
- 'contract': 'month-to-month',
- 'paperlessbilling': 'yes',
- 'paymentmethod': 'mailed_check',
- 'monthlycharges': 49.95,
- 'tenure': 13,
- 'totalcharges': 587.45}
+app = Flask('churn')
 
-X = dv.transform([customer])
-y_pred = model.predict_proba(X)[0, 1]
-print(f'input = {customer}')
-print(f"Churn probability: {y_pred:.2f}")
+@app.route('/predict', methods=['POST'])
+def predict():
+    customer = request.get_json()
+
+    X = dv.transform([customer])
+    y_pred = model.predict_proba(X)[0, 1]
+    churn = y_pred >= 0.5  # Assuming a threshold of 0.5 for churn prediction
+    result = {
+        'churn_probability': float(y_pred),
+        'churn': bool(churn)
+    }
+    return jsonify(result)
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=9696)
