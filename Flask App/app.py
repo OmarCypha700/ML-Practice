@@ -7,29 +7,31 @@ with open(input_file, 'rb') as f_in:
 
 app = Flask('churn')
 
-@app.route('/', methods=['GET']) # Homepage
-def home():
-    return render_template('index.html')
+# @app.route('/', methods=['GET']) # Homepage
+# def home():
+
+#     return render_template('index.html')
 
 
-@app.route('/predict', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def predict():
-    """
-    For rendering results on HTML template
-    """
-    # customer = request.get_json()
-    customer = request.form.to_dict()
+    if request.method == 'POST':
+        # customer = request.get_json()
+        customer = request.form.to_dict()
 
-    X = dv.transform([customer])
-    y_pred = model.predict_proba(X)[0, 1]
-    churn = y_pred >= 0.5  # Assuming a threshold of 0.5 for churn prediction
-    result = {
-        'churn_probability': float(y_pred),
-        'churn': bool(churn)
-    }
-    # return jsonify(result)
-    return result
-    return render_template('index.html', prediction_results = result)
+        X = dv.transform([customer])
+        y_pred = model.predict_proba(X)[0, 1]
+        churn = y_pred >= 0.5  # Assuming a threshold of 0.5 for churn prediction
+        result = {
+            'churn_probability': round(float(y_pred),2),
+            'churn': bool(churn)
+        }
+
+        # Render the same template with the prediction results
+        return render_template('index.html', prediction_results = result)
+    # For GET request, render the template without results    
+    return render_template('index.html')
+   
 
 
 if __name__ == '__main__':
